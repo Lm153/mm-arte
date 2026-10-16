@@ -5,70 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MM Arte Digital - Confirmación de Pago</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 400px;
-            width: 100%;
-        }
-        h2 { color: #333; }
-        p { color: #666; font-size: 14px; line-height: 1.5; }
-        .btn {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-        .btn:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        .status-box {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 6px;
-            font-weight: bold;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 100%; }
+        h2 { color: #333; } p { color: #666; font-size: 14px; line-height: 1.5; }
+        .btn { background-color: #007bff; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; width: 100%; font-weight: bold; }
+        .btn:disabled { background-color: #cccccc; cursor: not-allowed; }
+        .status-box { display: none; margin-top: 20px; padding: 15px; border-radius: 6px; font-weight: bold; }
         .pending { background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; }
         .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     </style>
 </head>
 <body>
-
 <div class="card">
     <h2>MM Arte Digital</h2>
-    <p>Para recibir tu diseño automático, realiza tu transferencia por Yappy y presiona el botón de abajo para verificar tu orden.</p>
-    
+    <p>Realiza tu transferencia por Yappy y presiona el botón de abajo para verificar tu orden.</p>
     <button id="btnPagar" class="btn" onclick="procesarPago()">Ya transferí por Yappy</button>
-
     <div id="statusBox" class="status-box"></div>
 </div>
 
-<!-- Scripts de Firebase compatibles con archivos locales -->
 <script src="https://gstatic.com"></script>
 <script src="https://gstatic.com"></script>
-
 <script>
-    // Tus credenciales maestras de Firebase
     const firebaseConfig = {
         apiKey: "AIzaSyAXYLFOtpQ-acGNoUGEEpo9HRQm1HZDBIU",
         authDomain: "://firebaseapp.com",
@@ -77,48 +34,36 @@
         messagingSenderId: "911348943499",
         appId: "1:911348943499:web:d3eb03149963fc52bae28e"
     };
-
-    // Inicializar Firebase en modo compatible
-    const app = firebase.initializeApp(firebaseConfig);
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // Función del botón
     async function procesarPago() {
         const btn = document.getElementById('btnPagar');
         const statusBox = document.getElementById('statusBox');
-        
         btn.disabled = true;
         statusBox.style.display = "block";
         statusBox.className = "status-box pending";
-        statusBox.innerText = "Verificando pago... Tu diseño se descargará automáticamente en cuanto se confirme la transferencia.";
+        statusBox.innerText = "Verificando pago... Tu diseño se descargará automáticamente en cuanto se confirme.";
 
         try {
-            // Guardar orden en la base de datos
             const docRef = await db.collection("ordenes").add({
                 fecha: new Date(),
                 estado: "Pendiente",
                 item: "Diseño Digital Completo"
             });
-
-            // Escuchar cambios en tiempo real
             db.collection("ordenes").doc(docRef.id).onSnapshot((docSnap) => {
                 if (docSnap.exists && docSnap.data().estado === "Aprobado") {
                     statusBox.className = "status-box success";
-                    statusBox.innerText = "¡Pago verificado exitosamente! Descargando tu diseño...";
-                    
-                    setTimeout(() => {
-                        alert("¡Pago enviado con éxito! Por favor espera que el administrador apruebe tu orden.");
-                    }, 2000);
+                    statusBox.innerText = "¡Pago verificado! Descargando tu diseño...";
+                    alert("¡Pago aprobado por el administrador! Descarga liberada.");
                 }
             });
-
         } catch (error) {
-            console.error("Error en Firebase: ", error);
-            statusBox.innerText = "Hubo un error de conexión, por favor intenta de nuevo.";
+            console.error(error);
+            statusBox.innerText = "Hubo un error de conexión, intenta de nuevo.";
             btn.disabled = false;
         }
     }
 </script>
-
 </body>
 </html>
